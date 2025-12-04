@@ -16,8 +16,6 @@
 
 Toda la simulación corre dentro de un contenedor **n8n**, asegurando un entorno reproducible y persistente.
 
-El archivo `docker-compose.yml` debe contener:
-
 Para levantar el proyecto:
 
 ```bash
@@ -69,7 +67,7 @@ Crear una tabla llamada **subasta** con los siguientes campos:
 
 ---
 
-# **2. Descripción de la simulación de subasta con agentes inteligentes**
+# **Descripción de la simulación de subasta con agentes inteligentes**
 
 El objetivo del experimento es estudiar **comportamientos de agentes autónomos** dentro de un escenario competitivo: **una subasta dinámica** donde cada agente recibe el estado actual y decide si realizar o no una puja.
 
@@ -100,7 +98,7 @@ Esto implementa un sistema de **IA Distribuida**, donde agentes autónomos colab
 
 ---
 
-# **3. Comportamiento de los agentes**
+# **Comportamiento de los agentes**
 
 Cada agente es un nodo “Code” con lógica propia. Sus decisiones se basan en:
 
@@ -189,7 +187,7 @@ return [{
 
 ---
 
-# **4. Construcción de la simulación**
+# **Construcción de la simulación**
 
 La arquitectura está compuesta por dos workflows:
 
@@ -239,7 +237,7 @@ Esta estructura separa **interacción**, **persistencia**, **decisiones** y **vi
 
 ---
 
-# **5. Casos de prueba (10 iteraciones)**
+# **Casos de prueba (10 iteraciones)**
 
 Se realizaron múltiples ciclos de ejecución, encontrando los siguientes patrones:
 
@@ -267,7 +265,7 @@ A veces sorprende y supera a todos los demás.
 
 ---
 
-# **6. Conclusiones**
+# **Conclusiones**
 
 * El montaje de agentes autónomos en un ambiente distribuido demuestra la interacción emergente entre estrategias opuestas.
 * La simulación evidencia cómo **reglas simples generan comportamientos complejos**, un principio fundamental de la Inteligencia Artificial Distribuida.
