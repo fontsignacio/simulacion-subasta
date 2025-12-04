@@ -1,0 +1,282 @@
+{
+  "name": "Simulacion Subasta - TRIGGERS",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "simulacion-agentes",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "420c6f39-7c5c-4611-8ac0-ed27161020a8",
+      "name": "Webhook POST",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        544
+      ],
+      "webhookId": "302b0631-6017-4f3e-bbf5-076d8d038726"
+    },
+    {
+      "parameters": {
+        "path": "simulacion-agentes",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "d2ed7eeb-7118-4445-9ad1-701e926a8923",
+      "name": "Webhook GET",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        736
+      ],
+      "webhookId": "8ab95b6b-c33d-464e-8697-28d05f010cef"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ----- CARGAR ESTADO -----\nlet state = $input.first().json || {};\n\n// ----- ADAPTAR PUJAS SEGÚN LO QUE DEVUELVE DATA TABLE -----\n\nlet pujas = [];\n\ntry {\n  if (Array.isArray(state.pujas)) {\n    pujas = state.pujas;\n  } else {\n    pujas = JSON.parse(state.pujas || \"[]\");\n    if (!Array.isArray(pujas)) pujas = [];\n  }\n} catch {\n  pujas = [];\n}\n\nstate.pujas = pujas;\n\n// ----- FALLBACKS (MISMO ESTILO QUE POST) -----\n\nif (typeof state.precioActual !== \"number\") {\n  state.precioActual = Math.floor(Math.random() * 700) + 100;\n}\n\nif (typeof state.mejorPuja !== \"number\") {\n  state.mejorPuja = 0;\n}\n\nif (!state.ganador) {\n  state.ganador = \"Nadie\";\n}\n\n// 🎨 HTML mejorado\nconst tabla = `\n<html>\n  <head>\n    <meta charset=\"UTF-8\"/>\n    <title>Subasta Inteligente</title>\n\n    <style>\n      body {\n        font-family: 'Inter', Arial, sans-serif;\n        background: #f5f6fa;\n        padding: 30px;\n        color: #333;\n      }\n\n      .container {\n        max-width: 900px;\n        margin: auto;\n        background: white;\n        padding: 30px;\n        border-radius: 12px;\n        box-shadow: 0 4px 20px rgba(0,0,0,0.1);\n      }\n\n      h1 {\n        text-align: center;\n        color: #4a69bd;\n        margin-bottom: 20px;\n      }\n\n      .stats-box {\n        display: flex;\n        justify-content: space-between;\n        margin-bottom: 25px;\n      }\n\n      .stat {\n        flex: 1;\n        text-align: center;\n        background: #f0f3f8;\n        padding: 15px;\n        margin: 0 10px;\n        border-radius: 10px;\n        box-shadow: inset 0 0 5px rgba(0,0,0,0.05);\n      }\n\n      .stat-title {\n        font-size: 14px;\n        color: #666;\n      }\n\n      .stat-value {\n        font-size: 26px;\n        font-weight: bold;\n        margin-top: 8px;\n        color: #2d3436;\n      }\n\n      table {\n        width: 100%;\n        border-collapse: collapse;\n        margin-top: 25px;\n      }\n\n      th {\n        background: #4a69bd;\n        color: white;\n        padding: 12px;\n        font-size: 14px;\n        text-transform: uppercase;\n      }\n\n      td {\n        background: #f8f9fa;\n        padding: 10px;\n        border-bottom: 1px solid #ddd;\n      }\n\n      tr:hover td {\n        background: #e8ecf5;\n      }\n\n      .no-pujas {\n        text-align: center;\n        margin-top: 15px;\n        font-style: italic;\n        color: #777;\n      }\n    </style>\n  </head>\n\n  <body>\n    <div class=\"container\">\n      \n      <h1>🏆 Subasta Inteligente</h1>\n\n      <div class=\"stats-box\">\n        <div class=\"stat\">\n          <div class=\"stat-title\">Precio Actual</div>\n          <div class=\"stat-value\">$${state.precioActual}</div>\n        </div>\n\n        <div class=\"stat\">\n          <div class=\"stat-title\">Mejor Puja</div>\n          <div class=\"stat-value\">$${state.mejorPuja}</div>\n        </div>\n\n        <div class=\"stat\">\n          <div class=\"stat-title\">Ganador</div>\n          <div class=\"stat-value\">${state.ganador}</div>\n        </div>\n      </div>\n\n      <h2>📋 Historial de Pujas</h2>\n      \n      ${\n        state.pujas.length === 0\n          ? `<p class=\"no-pujas\">Aún no hay pujas registradas.</p>`\n          : `\n            <table>\n              <tr>\n                <th>Agente</th>\n                <th>Monto</th>\n                <th>Estrategia</th>\n                <th>Hora</th>\n              </tr>\n              ${state.pujas.map(p => `\n                <tr>\n                  <td>${p.agente || '??'}</td>\n                  <td>$${p.monto || 0}</td>\n                  <td>${p.estrategia || '??'}</td>\n                  <td>${p.timestamp || ''}</td>\n                </tr>\n              `).join(\"\")}\n            </table>\n          `\n      }\n\n    </div>\n  </body>\n</html>\n`;\n\nreturn [\n  {\n    json: {\n      ...state,\n      tabla_html: tabla\n    }\n  }\n];\n"
+      },
+      "id": "c63de6d5-1e84-4a6f-b27a-2c8251df1c6d",
+      "name": "Generar HTML GET1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        176,
+        736
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ----- OBTENER BODY DEL WEBHOOK -----\nconst body = $('Webhook POST').first().json.body || {};\n\n// ----- OBTENER ESTADO ACTUAL DESDE DATA TABLE -----\nlet state = $input.first().json || {};\n\nif (typeof state.pujaCount !== 'number') state.pujaCount = 0;\n\n// Si pujas viene STRING → parsear, si viene array → usarlo\nlet pujas = [];\ntry {\n  if (Array.isArray(state.pujas)) pujas = state.pujas;\n  else pujas = JSON.parse(state.pujas || \"[]\");\n} catch {\n  pujas = [];\n}\n\nif (typeof state.mejorPuja !== 'number') state.mejorPuja = 0;\nif (!state.ganador) state.ganador = \"Nadie\";\nif (typeof state.precioActual !== 'number') state.precioActual = Math.floor(Math.random() * 700) + 100;\n\n// ----- EXTRAER CAMPOS DEL BODY -----\nconst agente = body.agente;\nconst monto = Number(body.monto);\nconst estrategia = body.estrategia;\nconst pujar = Boolean(body.pujar);\n\n// ----- SI LA PUJA NO VA, DEVOLVER SIN TOCAR -----\nif (!pujar || !agente || !estrategia || isNaN(monto) || monto <= 0) {\n  // Guardar pujas nuevamente como STRING\n  state.pujas = JSON.stringify(pujas);\n  return [{ json: state }];\n}\n\n// ----- REGISTRAR LA PUJA -----\nconst nuevaPuja = {\n  agente,\n  monto,\n  estrategia,\n  timestamp: new Date().toISOString()\n};\n\npujas.push(nuevaPuja);\n\n// ----- ACTUALIZAR GANADOR / MEJOR PUJA -----\nif (monto > state.mejorPuja) {\n  state.mejorPuja = monto;\n  state.ganador = agente;\n}\n\n// ----- PRECIO ACTUAL = MONTO -----\nstate.precioActual = monto;\n\n// ----- GUARDAR COMO STRING PARA DATA TABLES -----\nstate.pujas = JSON.stringify(pujas);\n\n// ----- DEVOLVER -----\nreturn [{ json: state }];\n"
+      },
+      "id": "2297c0a8-7fc8-4d05-a77b-0af8bf4ce660",
+      "name": "Logica POST Actualizar Estado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        176,
+        544
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "bdsEmMP9ISIMbycd",
+          "mode": "list",
+          "cachedResultName": "subasta",
+          "cachedResultUrl": "/projects/4oizjXyAKmRP3BFe/datatables/bdsEmMP9ISIMbycd"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyValue": "1"
+            }
+          ]
+        },
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        -128,
+        736
+      ],
+      "id": "92e82215-e806-4871-85e2-921d0567322f",
+      "name": "Get row(s)"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "bdsEmMP9ISIMbycd",
+          "mode": "list",
+          "cachedResultName": "subasta",
+          "cachedResultUrl": "/projects/4oizjXyAKmRP3BFe/datatables/bdsEmMP9ISIMbycd"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyValue": "1"
+            }
+          ]
+        },
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        -128,
+        544
+      ],
+      "id": "a399d03d-f097-4d63-9b4d-92cdc8e8cc63",
+      "name": "Get row(s)1"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "bdsEmMP9ISIMbycd",
+          "mode": "list",
+          "cachedResultName": "subasta",
+          "cachedResultUrl": "/projects/4oizjXyAKmRP3BFe/datatables/bdsEmMP9ISIMbycd"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyValue": "1"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "pujas": "={{ $json.pujas }}",
+            "mejorPuja": "={{ $json.mejorPuja }}",
+            "precioActual": "={{ $json.precioActual }}",
+            "ganador": "={{ $json.ganador }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "pujas",
+              "displayName": "pujas",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "mejorPuja",
+              "displayName": "mejorPuja",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "ganador",
+              "displayName": "ganador",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "precioActual",
+              "displayName": "precioActual",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "dryRun": false
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        464,
+        544
+      ],
+      "id": "2e2bec72-38eb-4951-bc8a-d58fb047c830",
+      "name": "Update row(s)"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook POST": {
+      "main": [
+        [
+          {
+            "node": "Get row(s)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook GET": {
+      "main": [
+        [
+          {
+            "node": "Get row(s)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generar HTML GET1": {
+      "main": [
+        []
+      ]
+    },
+    "Logica POST Actualizar Estado": {
+      "main": [
+        [
+          {
+            "node": "Update row(s)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s)": {
+      "main": [
+        [
+          {
+            "node": "Generar HTML GET1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s)1": {
+      "main": [
+        [
+          {
+            "node": "Logica POST Actualizar Estado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row(s)": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "bfb8bf84-d382-45f5-98ae-1f0ea91ba2ee",
+  "meta": {
+    "instanceId": "99dea714450516e2019d8d8452140777f1b74fce288de8785b7c104e37169184"
+  },
+  "id": "UoowpWfQv3CE7Et3",
+  "tags": []
+}

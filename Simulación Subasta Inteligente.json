@@ -1,0 +1,435 @@
+{
+  "name": "Simulación Subasta Inteligente",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "https://n8n-de-mi-amigo-fonts.lavallejuanmartin.com/webhook/simulacion-agentes",
+        "options": {}
+      },
+      "id": "94d06fc2-a5de-40bc-8047-10bf148f060d",
+      "name": "👁️ SENSOR (Ver Precio)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        -1232,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// CONSERVADOR\nconst precio = parseInt($input.first().json.precioActual);\n// presupuesto variable por ronda\nconst presupuesto = Math.floor(Math.random() * 200) + 200; // 200–400\n\nlet pujar = precio < presupuesto;\n\nlet monto = pujar ? precio + Math.floor(Math.random() * 10) + 1 : 0;\n\nreturn [{ json: { agente: 'Agente Conservador', pujar, monto, estrategia: 'Minimizar Gasto' }}];"
+      },
+      "id": "47586571-53f5-4bbc-852e-bd7d44a89cb1",
+      "name": "🧠 Agente 1 (Conservador)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -880,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// MAGNATE\nconst precio = parseInt($input.first().json.precioActual);\n// presupuesto alto pero limitado\nconst presupuesto = Math.floor(Math.random() * 400) + 700; // 700–1100\n// chance de que no puje aun con presupuesto\nconst quierePujar = Math.random() > 0.7; // 30% chance\n\nlet pujar = precio < presupuesto && quierePujar;\nlet monto = pujar ? precio + Math.floor(Math.random() * 25) + 5 : 0;\n\nreturn [{ json: { agente: 'Agente Magnate', pujar, monto, estrategia: 'Intimidación' }}];"
+      },
+      "id": "11b4c348-a207-4675-b15b-68058580f418",
+      "name": "🧠 Agente 2 (Magnate)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -880,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// FRANCOTIRADOR\nconst precio = parseInt($input.first().json.precioActual);\n// valor real dinámico\nconst valorReal = Math.floor(Math.random() * 200) + 500; // 500–700\n\nlet pujar = precio < valorReal * 0.55; // solo en oportunidades reales\nlet monto = pujar ? precio + (Math.floor(Math.random() * 15) + 5) : 0;\n\nreturn [{ json: { agente: 'Agente Francotirador', pujar, monto, estrategia: 'Oportunista' }}];"
+      },
+      "id": "4467e7cd-942d-4595-b823-c9bf58ef2e60",
+      "name": "🧠 Agente 3 (Francotirador)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -880,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// CAÓTICO  \nconst precio = parseInt($input.first().json.precioActual);\n\nconst pujar = Math.random() > 0.5; // 50%\nconst monto = pujar ? precio + Math.floor(Math.random() * 20) + 1 : 0;\n\nreturn [{ json: { agente: 'Agente Caótico', pujar, monto, estrategia: 'Aleatoria' }}];"
+      },
+      "id": "fd65a60f-bda0-402b-8c36-a944919636fc",
+      "name": "🧠 Agente 4 (Caótico)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -880,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://n8n-de-mi-amigo-fonts.lavallejuanmartin.com/webhook/simulacion-agentes",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "=agente",
+              "value": "={{ $json.agente }}"
+            },
+            {
+              "name": "pujar",
+              "value": "={{ $json.pujar }}"
+            },
+            {
+              "name": "monto",
+              "value": "={{ $json.monto }}"
+            },
+            {
+              "name": "estrategia",
+              "value": "={{ $json.estrategia }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "abd38fa8-2bca-421f-9cd3-a2084327732c",
+      "name": "✋ Efector (Enviar Puja 1)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        -576,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://n8n-de-mi-amigo-fonts.lavallejuanmartin.com/webhook/simulacion-agentes",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "agente",
+              "value": "={{$json.agente}}"
+            },
+            {
+              "name": "monto",
+              "value": "={{$json.monto}}"
+            },
+            {
+              "name": "estrategia",
+              "value": "={{$json.estrategia}}"
+            },
+            {
+              "name": "=pujar",
+              "value": "={{ $json.pujar }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "28ef8a74-9d2f-498b-b2f4-5ae0f71bd77b",
+      "name": "✋ Efector (Enviar Puja 2)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        -576,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://n8n-de-mi-amigo-fonts.lavallejuanmartin.com/webhook/simulacion-agentes",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "agente",
+              "value": "={{$json.agente}}"
+            },
+            {
+              "name": "monto",
+              "value": "={{$json.monto}}"
+            },
+            {
+              "name": "estrategia",
+              "value": "={{$json.estrategia}}"
+            },
+            {
+              "name": "=pujar",
+              "value": "={{ $json.pujar }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "af23affb-797d-4682-87d6-f485b3c9989d",
+      "name": "✋ Efector (Enviar Puja 3)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        -576,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://n8n-de-mi-amigo-fonts.lavallejuanmartin.com/webhook/simulacion-agentes",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "agente",
+              "value": "={{$json.agente}}"
+            },
+            {
+              "name": "monto",
+              "value": "={{$json.monto}}"
+            },
+            {
+              "name": "estrategia",
+              "value": "={{$json.estrategia}}"
+            },
+            {
+              "name": "=pujar",
+              "value": "={{ $json.pujar }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "27281ecb-0110-4d2c-892b-ade0f1d3f8a4",
+      "name": "✋ Efector (Enviar Puja 4)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        -576,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -1472,
+        192
+      ],
+      "id": "97e206ba-10aa-4cce-b2b3-a3116e4bb9ba",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "numberInputs": 4
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -240,
+        224
+      ],
+      "id": "91b82401-6a04-4d5f-9494-4c249d78ef96",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "url": "https://n8n-de-mi-amigo-fonts.lavallejuanmartin.com/webhook/simulacion-agentes",
+        "options": {}
+      },
+      "id": "9e923b7e-1c15-4c2d-b309-09af68aff499",
+      "name": "👁️ SENSOR (Ver Precio)1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        -32,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "html": "{{ $json.tabla_html }}"
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        176,
+        256
+      ],
+      "id": "7908935f-9d6b-4634-9e7c-69383677f961",
+      "name": "HTML"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "👁️ SENSOR (Ver Precio)": {
+      "main": [
+        [
+          {
+            "node": "🧠 Agente 1 (Conservador)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "🧠 Agente 2 (Magnate)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "🧠 Agente 3 (Francotirador)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "🧠 Agente 4 (Caótico)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🧠 Agente 1 (Conservador)": {
+      "main": [
+        [
+          {
+            "node": "✋ Efector (Enviar Puja 1)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🧠 Agente 2 (Magnate)": {
+      "main": [
+        [
+          {
+            "node": "✋ Efector (Enviar Puja 2)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🧠 Agente 3 (Francotirador)": {
+      "main": [
+        [
+          {
+            "node": "✋ Efector (Enviar Puja 3)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🧠 Agente 4 (Caótico)": {
+      "main": [
+        [
+          {
+            "node": "✋ Efector (Enviar Puja 4)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "👁️ SENSOR (Ver Precio)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "✋ Efector (Enviar Puja 2)": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "✋ Efector (Enviar Puja 1)": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "✋ Efector (Enviar Puja 3)": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "✋ Efector (Enviar Puja 4)": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "👁️ SENSOR (Ver Precio)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "👁️ SENSOR (Ver Precio)1": {
+      "main": [
+        [
+          {
+            "node": "HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d6a54c26-19a3-4f8c-9680-5b0631d6a435",
+  "meta": {
+    "instanceId": "99dea714450516e2019d8d8452140777f1b74fce288de8785b7c104e37169184"
+  },
+  "id": "Qz6YCD32xeY5dcUJ",
+  "tags": []
+}
