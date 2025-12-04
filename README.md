@@ -10,23 +10,62 @@
 
 ---
 
-# **1. Montaje del entorno (Docker Compose)**
+# ✅ **Pasos para levantar el proyecto**
 
-Para garantizar reproducibilidad y despliegue consistente, la simulación completa corre dentro de un contenedor **n8n** administrado por Docker.
-El entorno se define mediante un archivo `docker-compose.yml`:
+## **1. Montaje del entorno (Docker Compose)**
 
-Este servicio ejecuta n8n en modo servidor, habilitando:
+Toda la simulación corre dentro de un contenedor **n8n**, asegurando un entorno reproducible y persistente.
 
-* Capacidad de **ejecutar workflows de agentes** cada minuto.
-* Endpoints webhook GET/POST persistentes.
-* Persistencia mediante Data Tables (almacenadas en SQLite interna del contenedor).
+El archivo `docker-compose.yml` debe contener:
 
-Para levantar el proyecto, insertar en la terminal:
+Para levantar el proyecto:
 
 ```bash
 docker compose up --build
+```
+
+---
+
+## **2. Importar los workflows (.json)**
+
+Debés importar **los 2 workflows**:
+
+### ✔️ Workflow principal (simulación de subasta)
+
+Ruta del archivo:
 
 ```
+/Simulación Subasta Inteligente.json
+```
+
+### ✔️ Workflow de Triggers (Agentes + GET/POST)
+
+Ruta del archivo:
+
+```
+/Simulacion Subasta - TRIGGERS.json
+```
+
+En n8n → *Workflows* → **Import from File**.
+
+---
+
+## **3. Crear la Data Table**
+
+Crear una tabla llamada **subasta** con los siguientes campos:
+
+| Campo        | Tipo     | Descripción               |
+| ------------ | -------- | ------------------------- |
+| id           | number   | Primary key               |
+| pujas        | text     | Lista JSON de pujas       |
+| mejorPuja    | number   | Mejor monto registrado    |
+| ganador      | text     | Nombre del agente ganador |
+| precioActual | number   | Último precio observado   |
+| createdAt    | datetime | Auto                      |
+| updatedAt    | datetime | Auto                      |
+
+<img width="1868" height="76" alt="image" src="https://github.com/user-attachments/assets/4bff2ecb-8018-46f0-8bcb-748a100503be" />
+
 
 ---
 
